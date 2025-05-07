@@ -9,6 +9,7 @@
 
 int defline_parser(char *sequence, int sequence_length);
 char *add_char_to_string(char *old_string, char new_char);
+int add_char_to_string2(const char *old_string, char **new_string, char new_char);
 
 // Data structure for every token
 typedef struct {
@@ -34,20 +35,29 @@ int main(void) {
 
     for (int i = 0; i < sequence_length; i++) {
         char c1 = standard_sequence[i];
-        
+        // Find the defline character
         if (c1 == '>') {
-            // Start the defline
-            char *string1 = "";
-            for (int j = i; j < sequence_length; j ++) {
-                char c2 = standard_sequence[j];
-                char *temp;
-                strcpy(temp, string1);
-                string1 = add_char_to_string(temp, c2);
+            // Start of the defline
 
+            // String containing the defline
+            char *string1 = NULL;
+            // Iterate through the original string and copy each char in string1 
+            for (int j = i; j < sequence_length; j ++) {
+                // new char to add
+                char c2 = standard_sequence[j];
+                // temporary string to store the defline read until now
+                char *temp;
+                // copy the defline read until now
+                strcpy(temp, string1);
+                // add the new char
+                if (add_char_to_string2(temp, &string1, c2) == 0) {
+                    printf("%ith char %s\n", j, string1);
+                } 
+                
                 if (c2 == '\n') {
                     printf("%s\n", string1);
                 }
-            }            
+            } 
         }
     }
 
@@ -83,12 +93,28 @@ int defline_parser(char *sequence, int sequence_length) {
 char *add_char_to_string(char *old_string, char new_char) {
     int old_string_length = strlen(old_string);
 
-    int new_string_size = (old_string_length + 1) * sizeof(char);
+    int new_string_size = (old_string_length + 2) * sizeof(char);
     char *new_string = malloc(new_string_size);
 
     for (int i = 0; i < old_string_length; i ++) {
         new_string[i] = old_string[i];
     }
     new_string[old_string_length] = new_char;
+    new_string[old_string_length + 1] = '\0';
     return new_string;
+}
+
+int add_char_to_string2(const char *old_string, char **new_string, char new_char) {
+    int old_string_length = strlen(old_string);
+    int new_string_size = (old_string_length + 2) * sizeof(char);
+    *new_string = malloc(new_string_size);
+
+    if (*new_string == NULL) {
+        return -1;
+    }
+
+    strcpy(*new_string, old_string);
+    (*new_string)[old_string_length] = new_char;
+    (*new_string)[old_string_length + 1] = '\0';
+    return 0;
 }
